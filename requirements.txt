@@ -1,0 +1,14 @@
+mcp
+yfinance
+newsapi-python
+google-genai
+streamlit
+plotly
+textblob
+vaderSentiment
+sqlalchemy
+pandas
+ta
+python-dotenv
+aiohttp
+httpx

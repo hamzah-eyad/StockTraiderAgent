@@ -1,0 +1,26 @@
+# Secrets — never commit
+.env
+.env.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+.venv/
+venv/
+ENV/
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Local data (optional — recreated at runtime)
+data/*.db
+data/cache/
+
+# Streamlit
+.streamlit/secrets.toml
