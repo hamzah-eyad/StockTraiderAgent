@@ -67,7 +67,7 @@ def render(agent, engine, autopilot=None):
             # Display nicely in a table
             df = pd.DataFrame(alerts_list)
             # Reorder and format columns
-            df["time"] = pd.to_datetime(df["created_at"]).dt.strftime("%Y-%m-%d %H:%M")
+            df["time"] = pd.to_datetime(df["created_at"], utc=True).dt.strftime("%Y-%m-%d %H:%M")
             display_df = df[["alert_id", "ticker", "condition", "target_price", "status", "note", "time"]]
             st.dataframe(display_df, use_container_width=True, hide_index=True)
             

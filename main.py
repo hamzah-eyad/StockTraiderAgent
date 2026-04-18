@@ -89,6 +89,8 @@ def run_mcp_servers():
         ("Banking", "mcp_servers/banking_server.py"),
         ("Price Alerts", "mcp_servers/price_alert_server.py"),
         ("Watchlist", "mcp_servers/watchlist_server.py"),
+        ("Pattern Scanner", "mcp_servers/pattern_scanner_server.py"),
+        ("Risk Metrics", "mcp_servers/risk_metrics_server.py"),
     ]
 
     import os

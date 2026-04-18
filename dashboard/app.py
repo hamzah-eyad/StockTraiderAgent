@@ -65,6 +65,8 @@ pages = {
     "Banking (Open Banking)": "banking",
     "Price Alerts": "price_alerts",
     "Watchlist": "watchlist",
+    "Pattern Scanner": "pattern_scanner",
+    "Risk Metrics": "risk_metrics",
     "Settings": "settings",
 }
 

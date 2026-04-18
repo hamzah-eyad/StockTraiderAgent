@@ -54,6 +54,8 @@ class TradingAgent:
         self._geopolitical_tools = {}
         self._trade_tools = {}
         self._banking_tools = {}
+        self._pattern_tools = {}
+        self._risk_metrics_tools = {}
         self._last_risk_score: float = 50.0
         self._analysis_history: list[dict] = []
         self._live_actions: list[dict] = []
@@ -80,6 +82,10 @@ class TradingAgent:
         )
         from mcp_servers.watchlist_server import (
             add_to_watchlist, remove_from_watchlist, get_watchlist_snapshot, clear_watchlist,
+        )
+        from mcp_servers.pattern_scanner_server import scan_patterns, get_signal_summary
+        from mcp_servers.risk_metrics_server import (
+            get_portfolio_risk_metrics, get_stock_risk_profile,
         )
 
         self._financial_tools = {
@@ -123,15 +129,25 @@ class TradingAgent:
             "get_watchlist_snapshot": get_watchlist_snapshot,
             "clear_watchlist": clear_watchlist,
         }
+        self._pattern_tools = {
+            "scan_patterns": scan_patterns,
+            "get_signal_summary": get_signal_summary,
+        }
+        self._risk_metrics_tools = {
+            "get_portfolio_risk_metrics": get_portfolio_risk_metrics,
+            "get_stock_risk_profile": get_stock_risk_profile,
+        }
 
     def _all_tools(self) -> dict:
         return {
-            **self._financial_tools, 
-            **self._geopolitical_tools, 
+            **self._financial_tools,
+            **self._geopolitical_tools,
             **self._trade_tools,
             **self._banking_tools,
             **self._alert_tools,
             **self._watchlist_tools,
+            **self._pattern_tools,
+            **self._risk_metrics_tools,
         }
 
     def _build_gemini_tools(self) -> list[types.Tool]:
@@ -330,6 +346,56 @@ class TradingAgent:
                 "description": "Remove ALL stocks from the user's watchlist. Always confirm with the user before calling this.",
                 "params": {},
                 "required": [],
+            },
+            "scan_patterns": {
+                "description": (
+                    "Scan multiple stocks for active technical signals and return a bullish/bearish "
+                    "bias with a signal score for each. Detects: golden cross, death cross (SMA 50/200), "
+                    "RSI overbought/oversold, MACD crossover, and Bollinger Band breakouts. "
+                    "Use this to identify which stocks have the most setup opportunities right now."
+                ),
+                "params": {
+                    "symbols": {
+                        "type": "STRING",
+                        "description": "Comma-separated list of ticker symbols, e.g. 'AAPL,MSFT,NVDA'.",
+                    }
+                },
+                "required": ["symbols"],
+            },
+            "get_signal_summary": {
+                "description": (
+                    "Get a detailed breakdown of all current technical signals for a single stock: "
+                    "RSI, MACD differential, Bollinger Band levels, SMA crossover status, and a "
+                    "signal score with bullish/bearish/neutral bias."
+                ),
+                "params": {
+                    "symbol": {"type": "STRING", "description": "Stock ticker symbol, e.g. 'AAPL'."}
+                },
+                "required": ["symbol"],
+            },
+            "get_portfolio_risk_metrics": {
+                "description": (
+                    "Compute portfolio-level quantitative risk metrics using 1 year of daily return data: "
+                    "Value at Risk (VaR 95%/99% in dollars), Sharpe Ratio, Sortino Ratio, portfolio beta "
+                    "vs S&P 500, annualized volatility, sector concentration (% weight per sector), and "
+                    "maximum drawdown. Call this before making large trades to assess current risk exposure."
+                ),
+                "params": {},
+                "required": [],
+            },
+            "get_stock_risk_profile": {
+                "description": (
+                    "Get individual stock risk metrics for any ticker: annualized volatility, beta vs "
+                    "S&P 500, maximum drawdown, Sharpe ratio, and average daily return over the chosen period."
+                ),
+                "params": {
+                    "symbol": {"type": "STRING", "description": "Stock ticker symbol, e.g. 'AAPL'."},
+                    "period": {
+                        "type": "STRING",
+                        "description": "Lookback period: '1y', '6mo', '3mo', or '2y'. Default: '1y'.",
+                    },
+                },
+                "required": ["symbol"],
             },
         }
 

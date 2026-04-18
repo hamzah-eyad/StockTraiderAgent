@@ -8,7 +8,7 @@ import pandas as pd
 
 def create_candlestick_chart(data: list[dict], symbol: str) -> go.Figure:
     df = pd.DataFrame(data)
-    df["date"] = pd.to_datetime(df["date"])
+    df["date"] = pd.to_datetime(df["date"], utc=True)
 
     fig = go.Figure(data=[
         go.Candlestick(
@@ -38,7 +38,7 @@ def create_portfolio_value_chart(history: list[dict]) -> go.Figure:
         return fig
 
     df = pd.DataFrame(history)
-    df["date"] = pd.to_datetime(df["date"])
+    df["date"] = pd.to_datetime(df["date"], utc=True)
 
     fig = go.Figure()
     fig.add_trace(go.Scatter(
@@ -158,7 +158,7 @@ def create_backtest_chart(
 
     if portfolio_values:
         df = pd.DataFrame(portfolio_values)
-        df["date"] = pd.to_datetime(df["date"])
+        df["date"] = pd.to_datetime(df["date"], utc=True)
         fig.add_trace(go.Scatter(
             x=df["date"],
             y=df["value"],
@@ -169,7 +169,7 @@ def create_backtest_chart(
 
     if benchmark_values:
         bdf = pd.DataFrame(benchmark_values)
-        bdf["date"] = pd.to_datetime(bdf["date"])
+        bdf["date"] = pd.to_datetime(bdf["date"], utc=True)
         fig.add_trace(go.Scatter(
             x=bdf["date"],
             y=bdf["value"],
@@ -195,7 +195,7 @@ def create_trades_timeline(trades: list[dict]) -> go.Figure:
         return fig
 
     df = pd.DataFrame(trades)
-    df["timestamp"] = pd.to_datetime(df["timestamp"])
+    df["timestamp"] = pd.to_datetime(df["timestamp"], utc=True)
 
     buys = df[df["side"] == "buy"]
     sells = df[df["side"] == "sell"]
