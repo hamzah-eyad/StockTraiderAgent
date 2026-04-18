@@ -20,6 +20,7 @@ Thumbs.db
 
 # Local data (optional — recreated at runtime)
 data/*.db
+data/*.json
 data/cache/
 
 # Streamlit

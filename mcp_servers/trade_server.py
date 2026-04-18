@@ -13,7 +13,7 @@ from config import INITIAL_BALANCE, COMMISSION_RATE
 
 logger = logging.getLogger(__name__)
 
-mcp = FastMCP("Trade Execution Server")
+mcp = FastMCP("Trade Execution Server", host="0.0.0.0", port=8003)
 
 _engine: PaperTradingEngine | None = None
 
@@ -120,4 +120,4 @@ def cancel_order(order_id: str) -> str:
 
 
 if __name__ == "__main__":
-    mcp.run(transport="streamable-http", host="localhost", port=8003)
+    mcp.run(transport="streamable-http")

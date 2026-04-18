@@ -84,14 +84,21 @@ def run_mcp_servers():
 
     servers = [
         ("Financial Data", "mcp_servers/financial_data_server.py"),
-        ("Geopolitical Intelligence", "mcp_servers/geopolitical_server.py"),
-        ("Trade Execution", "mcp_servers/trade_server.py"),
+        ("Geopolitical", "mcp_servers/geopolitical_server.py"),
+        ("Trade", "mcp_servers/trade_server.py"),
+        ("Banking", "mcp_servers/banking_server.py"),
+        ("Price Alerts", "mcp_servers/price_alert_server.py"),
+        ("Watchlist", "mcp_servers/watchlist_server.py"),
     ]
 
+    import os
+    env = os.environ.copy()
+    env["PYTHONPATH"] = os.path.abspath(".")
+    
     processes = []
     for name, path in servers:
         logger.info(f"Starting {name} MCP Server...")
-        proc = subprocess.Popen([sys.executable, path])
+        proc = subprocess.Popen([sys.executable, path], env=env)
         processes.append(proc)
         time.sleep(1)
 

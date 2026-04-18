@@ -15,7 +15,7 @@ from mcp.server.fastmcp import FastMCP
 
 logger = logging.getLogger(__name__)
 
-mcp = FastMCP("Financial Data Server")
+mcp = FastMCP("Financial Data Server", host="0.0.0.0", port=8001)
 
 
 @mcp.tool()
@@ -226,4 +226,4 @@ def stock_history_resource(symbol: str) -> str:
 
 
 if __name__ == "__main__":
-    mcp.run(transport="streamable-http", host="localhost", port=8001)
+    mcp.run(transport="streamable-http")

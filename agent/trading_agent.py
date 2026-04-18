@@ -15,6 +15,18 @@ from google.genai import types
 
 from config import GEMINI_API_KEY, GEMINI_MODEL, RISK_THRESHOLDS
 from agent.prompts import SYSTEM_PROMPT, ANALYSIS_PROMPT
+from mcp_servers.price_alert_server import (
+    set_price_alert,
+    list_alerts,
+    delete_alert,
+    check_alerts,
+)
+from mcp_servers.watchlist_server import (
+    add_to_watchlist,
+    remove_from_watchlist,
+    get_watchlist_snapshot,
+    clear_watchlist,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +53,7 @@ class TradingAgent:
         self._financial_tools = {}
         self._geopolitical_tools = {}
         self._trade_tools = {}
+        self._banking_tools = {}
         self._last_risk_score: float = 50.0
         self._analysis_history: list[dict] = []
         self._live_actions: list[dict] = []
@@ -58,6 +71,15 @@ class TradingAgent:
         from mcp_servers.trade_server import (
             buy_stock, sell_stock, get_portfolio, get_account_balance,
             get_trade_history, get_open_orders, cancel_order,
+        )
+        from mcp_servers.banking_server import (
+            get_bank_accounts, get_bank_transactions, initiate_brokerage_transfer,
+        )
+        from mcp_servers.price_alert_server import (
+            set_price_alert, list_alerts, delete_alert, check_alerts,
+        )
+        from mcp_servers.watchlist_server import (
+            add_to_watchlist, remove_from_watchlist, get_watchlist_snapshot, clear_watchlist,
         )
 
         self._financial_tools = {
@@ -84,9 +106,33 @@ class TradingAgent:
             "get_open_orders": get_open_orders,
             "cancel_order": cancel_order,
         }
+        self._banking_tools = {
+            "get_bank_accounts": get_bank_accounts,
+            "get_bank_transactions": get_bank_transactions,
+            "initiate_brokerage_transfer": initiate_brokerage_transfer,
+        }
+        self._alert_tools = {
+            "set_price_alert": set_price_alert,
+            "list_alerts": list_alerts,
+            "delete_alert": delete_alert,
+            "check_alerts": check_alerts,
+        }
+        self._watchlist_tools = {
+            "add_to_watchlist": add_to_watchlist,
+            "remove_from_watchlist": remove_from_watchlist,
+            "get_watchlist_snapshot": get_watchlist_snapshot,
+            "clear_watchlist": clear_watchlist,
+        }
 
     def _all_tools(self) -> dict:
-        return {**self._financial_tools, **self._geopolitical_tools, **self._trade_tools}
+        return {
+            **self._financial_tools, 
+            **self._geopolitical_tools, 
+            **self._trade_tools,
+            **self._banking_tools,
+            **self._alert_tools,
+            **self._watchlist_tools,
+        }
 
     def _build_gemini_tools(self) -> list[types.Tool]:
         """Build Gemini function declarations from the registered MCP tools."""
@@ -206,6 +252,84 @@ class TradingAgent:
                 "description": "Cancel a pending limit order by its ID.",
                 "params": {"order_id": {"type": "STRING", "description": "Order ID to cancel"}},
                 "required": ["order_id"],
+            },
+            "get_bank_accounts": {
+                "description": "Get all linked bank accounts and their current balances.",
+                "params": {},
+                "required": [],
+            },
+            "get_bank_transactions": {
+                "description": "Get recent transactions for a specific bank account or all accounts.",
+                "params": {
+                    "account_id": {"type": "STRING", "description": "Optional account ID filter"},
+                    "limit": {"type": "INTEGER", "description": "Max number of transactions (default: 10)"},
+                },
+                "required": [],
+            },
+            "initiate_brokerage_transfer": {
+                "description": "Transfer funds from a bank account to the brokerage account.",
+                "params": {
+                    "amount": {"type": "NUMBER", "description": "Amount to transfer"},
+                    "account_id": {"type": "STRING", "description": "Source bank account ID"},
+                },
+                "required": ["amount", "account_id"],
+            },
+            "set_price_alert": {
+                "description": "Set a price alert for a stock. The agent will notify the user when the stock crosses the specified target price.",
+                "params": {
+                    "ticker": {"type": "STRING", "description": "Stock symbol, e.g. 'AAPL'"},
+                    "target_price": {"type": "NUMBER", "description": "The price level to watch"},
+                    "condition": {"type": "STRING", "description": "'above' or 'below'"},
+                    "note": {"type": "STRING", "description": "Optional note for the user"},
+                },
+                "required": ["ticker", "target_price", "condition"],
+            },
+            "list_alerts": {
+                "description": "List the user's price alerts, filtered by status.",
+                "params": {
+                    "status_filter": {
+                        "type": "STRING",
+                        "description": "One of 'active', 'triggered', 'deleted', or 'all'. Default: 'active'.",
+                    }
+                },
+                "required": [],
+            },
+            "delete_alert": {
+                "description": "Cancel and delete an active price alert by its numeric ID.",
+                "params": {
+                    "alert_id": {"type": "INTEGER", "description": "The ID of the alert to delete"}
+                },
+                "required": ["alert_id"],
+            },
+            "check_alerts": {
+                "description": "Evaluate all active price alerts against current live prices. Returns any newly triggered alerts so the agent can notify the user.",
+                "params": {},
+                "required": [],
+            },
+            "add_to_watchlist": {
+                "description": "Add a stock to the user's personal watchlist with an optional note.",
+                "params": {
+                    "ticker": {"type": "STRING", "description": "Stock symbol to watch, e.g. 'NVDA'"},
+                    "notes": {"type": "STRING", "description": "Optional reason for watching"},
+                },
+                "required": ["ticker"],
+            },
+            "remove_from_watchlist": {
+                "description": "Remove a stock from the user's watchlist.",
+                "params": {
+                    "ticker": {"type": "STRING", "description": "Stock symbol to remove"}
+                },
+                "required": ["ticker"],
+            },
+            "get_watchlist_snapshot": {
+                "description": "Fetch a live price snapshot of every stock on the user's watchlist, including daily change % and change since the stock was added.",
+                "params": {},
+                "required": [],
+            },
+            "clear_watchlist": {
+                "description": "Remove ALL stocks from the user's watchlist. Always confirm with the user before calling this.",
+                "params": {},
+                "required": [],
             },
         }
 

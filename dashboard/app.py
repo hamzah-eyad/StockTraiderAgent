@@ -12,6 +12,7 @@ project_root = str(Path(__file__).parent.parent)
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
+import json
 import streamlit as st
 
 st.set_page_config(
@@ -61,6 +62,9 @@ pages = {
     "Geopolitical Risk": "geopolitical_risk",
     "Trade History": "trade_history",
     "Backtesting": "backtesting_page",
+    "Banking (Open Banking)": "banking",
+    "Price Alerts": "price_alerts",
+    "Watchlist": "watchlist",
     "Settings": "settings",
 }
 
@@ -71,8 +75,14 @@ st.sidebar.divider()
 # Sidebar quick info
 try:
     balance = engine.get_account_balance()
+    from mcp_servers.banking_server import get_bank_accounts
+    bank_data = json.loads(get_bank_accounts())
+    bank_cash = sum(a["balance"] for a in bank_data.get("accounts", []))
+    net_worth = balance['total_value'] + bank_cash
+    
+    st.sidebar.metric("Total Net Worth", f"${net_worth:,.2f}")
     st.sidebar.metric("Portfolio Value", f"${balance['total_value']:,.2f}")
-    st.sidebar.metric("Cash", f"${balance['cash']:,.2f}")
+    st.sidebar.metric("Cash (Brokerage)", f"${balance['cash']:,.2f}")
     st.sidebar.metric("Return", f"{balance['total_return_pct']:+.2f}%")
 except Exception:
     st.sidebar.text("Portfolio loading...")

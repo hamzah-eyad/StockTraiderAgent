@@ -16,7 +16,7 @@ from config import NEWS_API_KEY
 
 logger = logging.getLogger(__name__)
 
-mcp = FastMCP("Geopolitical Intelligence Server")
+mcp = FastMCP("Geopolitical Intelligence Server", host="0.0.0.0", port=8002)
 
 _news_client: NewsApiClient | None = None
 _sentiment_analyzer = SentimentIntensityAnalyzer()
@@ -445,4 +445,4 @@ def get_conflict_monitor() -> str:
 
 
 if __name__ == "__main__":
-    mcp.run(transport="streamable-http", host="localhost", port=8002)
+    mcp.run(transport="streamable-http")
