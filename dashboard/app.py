@@ -56,6 +56,7 @@ st.sidebar.divider()
 
 pages = {
     "Overview": "overview",
+    "AI Assistant": "chatbot",
     "My Portfolio": "portfolio",
     "Manual Trade": "manual_trade",
     "Stock Analysis": "stock_analysis",
@@ -128,6 +129,7 @@ st.sidebar.divider()
 
 # AI Chat in sidebar
 st.sidebar.subheader("Quick AI Chat")
+st.sidebar.caption("For multi-turn chat, open the **AI Assistant** page.")
 user_input = st.sidebar.text_input("Ask the AI agent anything...", key="sidebar_chat")
 if user_input:
     with st.sidebar:
