@@ -8,6 +8,7 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from mcp_servers.risk_metrics_server import get_portfolio_risk_metrics, get_stock_risk_profile
+from dashboard.styles import page_header, section_header
 
 
 def _sharpe_label_color(sharpe: float | None) -> tuple[str, str]:
@@ -22,10 +23,9 @@ def _sharpe_label_color(sharpe: float | None) -> tuple[str, str]:
 
 
 def render(agent, engine, autopilot=None):
-    st.header("Portfolio Risk Metrics")
-    st.markdown(
-        "*Quantitative risk analysis using 1 year of daily return data: "
-        "Value at Risk, Sharpe & Sortino ratios, portfolio beta, sector exposure, and max drawdown.*"
+    page_header(
+        "Risk Metrics",
+        "VaR, Sharpe & Sortino ratios, beta, sector exposure, and max drawdown — 1-year daily data",
     )
 
     # ── Compute portfolio-level metrics ───────────────────────────────────────
@@ -46,7 +46,7 @@ def render(agent, engine, autopilot=None):
         return
 
     # ── Key metric cards (row 1) ──────────────────────────────────────────────
-    st.subheader("Portfolio Risk Overview")
+    section_header("Portfolio Risk Overview")
 
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("Portfolio Value",      f"${raw['portfolio_value']:,.2f}")
@@ -77,10 +77,14 @@ def render(agent, engine, autopilot=None):
     )
 
     sharpe_label, sharpe_color = _sharpe_label_color(sharpe)
+    pill_bg = {"Excellent": "pill-green", "Adequate": "pill-orange", "Poor": "pill-red"}.get(sharpe_label, "pill-gray")
     st.markdown(
-        f"Sharpe assessment: "
-        f'<span style="color:{sharpe_color}; font-weight:bold;">{sharpe_label}</span>'
-        f" &nbsp;*(>1.0 = excellent, 0.5–1.0 = adequate, <0.5 = poor risk-adjusted return)*",
+        f'<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;'
+        f'background:#0d1421;border:1px solid #1e2d45;border-radius:10px;margin:8px 0;">'
+        f'<span style="color:#8b9db8;font-size:0.82rem;">Sharpe Rating</span>'
+        f'<span class="pill {pill_bg}">{sharpe_label}</span>'
+        f'<span style="color:#3d4f68;font-size:0.78rem;">&gt;1.0 excellent · 0.5–1.0 adequate · &lt;0.5 poor</span>'
+        f'</div>',
         unsafe_allow_html=True,
     )
 
@@ -95,7 +99,7 @@ def render(agent, engine, autopilot=None):
     # ── Sector concentration ──────────────────────────────────────────────────
     sector_weights = raw.get("sector_weights", {})
     if sector_weights:
-        st.subheader("Sector Concentration")
+        section_header("Sector Concentration")
 
         col_pie, col_table = st.columns([1, 1])
 
@@ -134,7 +138,7 @@ def render(agent, engine, autopilot=None):
     st.divider()
 
     # ── Per-stock risk profiles ───────────────────────────────────────────────
-    st.subheader("Individual Stock Risk Profiles")
+    section_header("Individual Stock Risk Profiles")
 
     portfolio = engine.get_portfolio()
     positions = portfolio.get("positions", {})

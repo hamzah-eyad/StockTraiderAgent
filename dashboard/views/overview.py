@@ -5,6 +5,7 @@ import json
 import streamlit as st
 from dashboard.components.charts import create_risk_gauge, create_portfolio_value_chart
 from dashboard.components.widgets import metric_card, risk_badge, position_table, term_label
+from dashboard.styles import page_header, section_header
 
 
 # Kind → display label, background colour, text colour
@@ -25,7 +26,7 @@ def _autopilot_badge(kind: str) -> str:
 
 
 def render(agent, engine, autopilot=None):
-    st.header("Portfolio Overview")
+    page_header("Portfolio Overview", "Real-time account summary, positions, and AI autopilot controls")
 
     # ── Account summary ───────────────────────────────────────────────
     try:
@@ -56,8 +57,9 @@ def render(agent, engine, autopilot=None):
     left, right = st.columns([1, 1])
 
     with left:
+        section_header("Geopolitical Risk")
         st.markdown(
-            f"### {term_label('Geopolitical Risk Score')}",
+            f"<div style='margin-bottom:8px;'>{term_label('Geopolitical Risk Score')}</div>",
             unsafe_allow_html=True,
         )
         if st.button("Refresh Risk Score", key="refresh_risk"):
@@ -79,7 +81,7 @@ def render(agent, engine, autopilot=None):
             st.info(risk_data["advice"])
 
     with right:
-        st.subheader("Positions")
+        section_header("Current Positions")
         try:
             portfolio = engine.get_portfolio()
             position_table(portfolio.get("positions", {}))
@@ -89,7 +91,7 @@ def render(agent, engine, autopilot=None):
     st.divider()
 
     # ── Portfolio history ─────────────────────────────────────────────
-    st.subheader("Portfolio History")
+    section_header("Portfolio History")
     history = engine.portfolio.portfolio_history if hasattr(engine, "portfolio") else []
     if history:
         chart_data = [
@@ -104,7 +106,7 @@ def render(agent, engine, autopilot=None):
     st.divider()
 
     # ── Manual AI Agent controls ──────────────────────────────────────
-    st.subheader("Manual AI Trade Cycle")
+    section_header("Manual AI Trade Cycle")
 
     col_a, col_b = st.columns(2)
     with col_a:
@@ -147,18 +149,19 @@ def render(agent, engine, autopilot=None):
             status_icon = "✓" if status == "filled" else "✗" if status == "rejected" else "⏳"
 
             rows_html.append(
-                f'<div style="padding:4px 0;border-bottom:1px solid #1a1a1a;">'
-                f'<span style="color:{color};font-weight:bold;font-family:monospace;">{label}</span>'
-                f' <strong>{sym}</strong> &times;{qty} {price_str} '
-                f'<span style="color:#aaa;font-size:0.85em;">{status_icon} {short_reason}</span>'
+                f'<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #131d30;">'
+                f'<span style="color:{color};font-weight:700;font-family:monospace;font-size:0.82rem;min-width:36px;">{label}</span>'
+                f'<span style="color:#e8eaf0;font-weight:600;">{sym}</span>'
+                f'<span style="color:#8b9db8;font-size:0.85rem;">&times;{qty} {price_str}</span>'
+                f'<span style="color:#4a5a73;font-size:0.8rem;margin-left:auto;">{status_icon} {short_reason}</span>'
                 f'</div>'
             )
 
         st.markdown(
-            '<div style="background:#111;border-radius:8px;padding:10px;margin:8px 0;">'
+            '<div style="background:#0d1421;border:1px solid #1e2d45;border-radius:12px;padding:12px 16px;margin:8px 0;">'
             + "".join(rows_html)
-            + '<div style="color:#555;font-size:0.8em;margin-top:6px;">'
-            '  See full details in <strong>My Portfolio</strong> → Last Agent Cycle</div>'
+            + '<div style="color:#3d4f68;font-size:0.75rem;margin-top:10px;padding-top:6px;">'
+            '  Full reasoning in <strong style="color:#4a5a73;">My Portfolio → Last Agent Cycle</strong></div>'
             + "</div>",
             unsafe_allow_html=True,
         )
@@ -178,25 +181,20 @@ def render(agent, engine, autopilot=None):
     if autopilot is None:
         return
 
-    st.subheader("Autopilot — Real-time Autonomous Trading")
+    section_header("Autopilot — Autonomous Trading")
     st.markdown(
-        "The autopilot continuously monitors geopolitical risk and triggers the AI agent "
+        '<p style="color:#8b9db8;font-size:0.88rem;margin:-4px 0 12px 0;">'
+        "Continuously monitors geopolitical risk and triggers the AI agent "
         "to trade automatically when conditions change."
+        "</p>",
+        unsafe_allow_html=True,
     )
 
     # Status badge
     if autopilot.is_running:
-        st.markdown(
-            '<span style="background:#00d4aa;color:black;padding:4px 14px;'
-            'border-radius:12px;font-weight:bold;font-size:1em;">● AUTOPILOT RUNNING</span>',
-            unsafe_allow_html=True,
-        )
+        st.markdown('<span class="pill pill-green">● AUTOPILOT RUNNING</span>', unsafe_allow_html=True)
     else:
-        st.markdown(
-            '<span style="background:#444;color:#ccc;padding:4px 14px;'
-            'border-radius:12px;font-weight:bold;font-size:1em;">○ AUTOPILOT STOPPED</span>',
-            unsafe_allow_html=True,
-        )
+        st.markdown('<span class="pill pill-gray">○ AUTOPILOT STOPPED</span>', unsafe_allow_html=True)
 
     st.write("")
 
@@ -270,7 +268,7 @@ def render(agent, engine, autopilot=None):
     st.write("")
 
     # Live activity log
-    st.markdown("#### Live Activity Log")
+    section_header("Live Activity Log")
     col_log, col_refresh = st.columns([5, 1])
     with col_refresh:
         if st.button("Refresh", key="ap_log_refresh"):
@@ -300,15 +298,17 @@ def render(agent, engine, autopilot=None):
             )
 
             log_html.append(
-                f'<div style="padding:6px 0;border-bottom:1px solid #222;">'
-                f'<span style="color:#666;font-size:0.8em;">{ts} UTC</span> '
-                f'{badge}{risk_str}{trades_str}<br>'
-                f'<span style="font-size:0.9em;">{msg}</span>'
+                f'<div class="log-entry">'
+                f'<div style="display:flex;align-items:center;gap:8px;">'
+                f'<span class="log-ts">{ts} UTC</span>{badge}{risk_str}{trades_str}'
+                f'</div>'
+                f'<span class="log-msg">{msg}</span>'
                 f'</div>'
             )
 
         st.markdown(
-            f'<div style="max-height:400px;overflow-y:auto;padding:4px;">'
+            f'<div style="background:#0d1421;border:1px solid #1e2d45;border-radius:12px;'
+            f'padding:12px 16px;max-height:380px;overflow-y:auto;">'
             + "".join(log_html)
             + "</div>",
             unsafe_allow_html=True,

@@ -14,6 +14,7 @@ if project_root not in sys.path:
 
 import json
 import streamlit as st
+from dashboard.styles import inject_css
 
 st.set_page_config(
     page_title="AI Stock Trading Agent",
@@ -21,6 +22,8 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
+
+inject_css()
 
 from simulator.paper_trading import PaperTradingEngine
 from mcp_servers.trade_server import set_engine
@@ -50,8 +53,13 @@ agent = get_agent()
 autopilot = get_autopilot()
 
 # Sidebar navigation
-st.sidebar.title("AI Stock Trading Agent")
-st.sidebar.markdown("*MCP-Powered Geopolitical Risk Analysis*")
+st.sidebar.markdown(
+    '<div style="padding:4px 0 12px 0;">'
+    '<div style="font-size:1.05rem;font-weight:700;color:#fff;letter-spacing:-0.3px;">AI Stock Trader</div>'
+    '<div style="font-size:0.72rem;color:#3d4f68;margin-top:2px;text-transform:uppercase;letter-spacing:0.8px;">MCP · Gemini · Paper Trading</div>'
+    '</div>',
+    unsafe_allow_html=True,
+)
 st.sidebar.divider()
 
 pages = {
@@ -93,30 +101,33 @@ except Exception:
 st.sidebar.divider()
 
 # Sidebar autopilot status
-st.sidebar.subheader("Autopilot")
+st.sidebar.markdown(
+    '<div style="font-size:0.72rem;font-weight:700;color:#3d4f68;text-transform:uppercase;'
+    'letter-spacing:0.8px;margin-bottom:8px;">Autopilot</div>',
+    unsafe_allow_html=True,
+)
 if autopilot.is_running:
     st.sidebar.markdown(
-        '<span style="background:#00d4aa;color:black;padding:3px 10px;'
-        'border-radius:10px;font-weight:bold;">● RUNNING</span>',
+        '<span class="pill pill-green">● RUNNING</span>',
         unsafe_allow_html=True,
     )
 else:
     st.sidebar.markdown(
-        '<span style="background:#555;color:white;padding:3px 10px;'
-        'border-radius:10px;font-weight:bold;">○ STOPPED</span>',
+        '<span class="pill pill-gray">○ STOPPED</span>',
         unsafe_allow_html=True,
     )
 
 if autopilot.current_risk > 0:
     risk_color = (
         "#00d4aa" if autopilot.current_risk < 30
-        else "#ffa500" if autopilot.current_risk < 70
-        else "#ff4444"
+        else "#ff9800" if autopilot.current_risk < 70
+        else "#f44336"
     )
     st.sidebar.markdown(
-        f'<span style="font-size:0.85em;color:#aaa;">Risk Score: </span>'
-        f'<span style="color:{risk_color};font-weight:bold;">'
-        f'{autopilot.current_risk:.0f}</span>',
+        f'<div style="margin-top:6px;font-size:0.8rem;">'
+        f'<span style="color:#3d4f68;">Risk Score&nbsp;</span>'
+        f'<span style="color:{risk_color};font-weight:700;">{autopilot.current_risk:.0f}</span>'
+        f'</div>',
         unsafe_allow_html=True,
     )
 

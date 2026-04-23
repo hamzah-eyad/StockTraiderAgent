@@ -8,15 +8,16 @@ from datetime import datetime
 
 from mcp_servers.price_alert_server import set_price_alert, list_alerts, delete_alert, check_alerts
 from dashboard.components.widgets import metric_card
+from dashboard.styles import page_header, section_header
+
 
 def render(agent, engine, autopilot=None):
-    st.header("Price Alerts")
-    st.markdown("*Set thresholds to be notified when stocks move past specific prices.*")
-    
+    page_header("Price Alerts", "Set price thresholds — get notified when stocks hit your targets")
+
     col1, col2 = st.columns([1, 2])
-    
+
     with col1:
-        st.subheader("Create New Alert")
+        section_header("Create Alert")
         with st.form("new_alert_form"):
             ticker = st.text_input("Ticker Symbol", value="AAPL")
             condition = st.selectbox("Condition", options=["above", "below"])
@@ -35,7 +36,7 @@ def render(agent, engine, autopilot=None):
                         else:
                             st.error(res.get("message"))
 
-        st.subheader("Manual Check")
+        section_header("Manual Check")
         st.info("The AI Agent typically checks alerts automatically, but you can force a check now.")
         if st.button("Check Triggered Alerts"):
             with st.spinner("Checking live prices against active alerts..."):
@@ -51,7 +52,7 @@ def render(agent, engine, autopilot=None):
                     st.error(res.get("message"))
                     
     with col2:
-        st.subheader("Your Alerts")
+        section_header("Your Alerts")
         status_filter = st.selectbox("Filter by Status", options=["active", "triggered", "deleted", "all"], index=0)
         
         try:

@@ -1,10 +1,11 @@
-"""Dashboard page: AI Assistant — multi-turn chatbot powered by Gemini 2.5 Flash."""
+"""Dashboard page: AI Assistant — multi-turn chatbot powered by Gemini."""
 from __future__ import annotations
 
 import streamlit as st
 
 from agent.chat_session import ChatSession
 from config import GEMINI_MODEL
+from dashboard.styles import page_header
 
 
 STARTER_PROMPTS = [
@@ -68,23 +69,26 @@ def render(agent, engine, autopilot=None):
     # ── Header ────────────────────────────────────────────────────────────────
     top_l, top_r = st.columns([5, 1])
     with top_l:
-        st.header("AI Assistant")
-        st.caption(
-            f"Powered by Google `{GEMINI_MODEL}`. Ask about your money, analyze stocks, "
-            "or get guidance on how to use the dashboard. Trades require your confirmation."
+        page_header(
+            "AI Assistant",
+            f"Powered by {GEMINI_MODEL} · Ask about your money, stocks, or geopolitical risk · Trades need your confirmation",
         )
     with top_r:
         st.write("")
-        if st.button("Clear", help="Reset conversation", use_container_width=True):
+        if st.button("Clear chat", help="Reset conversation", use_container_width=True):
             _reset_chat()
             st.rerun()
 
     # ── Welcome / starter prompts (when empty) ────────────────────────────────
     if not st.session_state["chat_messages"]:
-        st.info(
-            "Try one of these to get started, or type your own question below. "
-            "I can look up live prices, your portfolio, geopolitical risk, and "
-            "propose trades that you confirm before they execute."
+        st.markdown(
+            '<div style="background:#0d1421;border:1px solid #1e2d45;border-radius:12px;'
+            'padding:16px 18px;margin-bottom:16px;">'
+            '<div style="color:#e8eaf0;font-weight:600;margin-bottom:6px;">Try a starter question</div>'
+            '<div style="color:#8b9db8;font-size:0.85rem;">I can look up live prices, your portfolio, '
+            'geopolitical risk, and propose trades that you confirm before they execute.</div>'
+            '</div>',
+            unsafe_allow_html=True,
         )
         chip_cols = st.columns(len(STARTER_PROMPTS))
         for i, prompt in enumerate(STARTER_PROMPTS):

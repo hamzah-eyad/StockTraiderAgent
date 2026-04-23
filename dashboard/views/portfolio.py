@@ -7,6 +7,7 @@ import streamlit as st
 from dashboard.components.charts import create_allocation_pie
 from dashboard.components.widgets import metric_card, term_label
 from dashboard.components.glossary import tip
+from dashboard.styles import page_header, section_header
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -34,32 +35,37 @@ def _pnl_bar(pnl_pct: float, width_px: int = 80) -> str:
 def _action_card(action: dict) -> str:
     """Render a single agent trade decision as an HTML card."""
     is_buy = action["action"] == "buy_stock"
-    side_color = "#00d4aa" if is_buy else "#ff4444"
+    side_color = "#00d4aa" if is_buy else "#f44336"
     side_label = "BUY" if is_buy else "SELL"
+    card_class = "trade-card trade-card-buy" if is_buy else "trade-card trade-card-sell"
     symbol = action.get("symbol", "?")
     qty = action.get("quantity", 0)
     price = action.get("price")
     price_str = f"@ ${price:.2f}" if price else "(price pending)"
     status = action.get("status", "unknown")
     status_icon = "✓" if status == "filled" else "✗" if status == "rejected" else "⏳"
-    status_color = "#00d4aa" if status == "filled" else "#ff4444" if status == "rejected" else "#aaa"
+    status_color = "#00d4aa" if status == "filled" else "#f44336" if status == "rejected" else "#8b9db8"
     reasoning = action.get("reasoning", "No reasoning provided.")
     risk = action.get("risk_score", 0)
     ts = action.get("timestamp", "")[:19].replace("T", " ")
 
     return (
-        f'<div style="border:1px solid #333;border-radius:10px;padding:14px;margin:8px 0;">'
-        f'<div style="display:flex;justify-content:space-between;align-items:center;">'
-        f'  <span style="color:{side_color};font-weight:bold;font-size:1.15em;">'
-        f'    [{side_label}] {symbol} &times;{qty} shares {price_str}'
-        f'  </span>'
-        f'  <span style="color:{status_color};font-weight:bold;">{status_icon} {status.upper()}</span>'
+        f'<div class="{card_class}">'
+        f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">'
+        f'  <div style="display:flex;align-items:center;gap:10px;">'
+        f'    <span style="color:{side_color};font-weight:700;font-size:0.8rem;font-family:monospace;'
+        f'      background:{"rgba(0,212,170,0.1)" if is_buy else "rgba(244,67,54,0.1)"};'
+        f'      padding:3px 9px;border-radius:5px;">{side_label}</span>'
+        f'    <span style="color:#fff;font-weight:700;font-size:1rem;">{symbol}</span>'
+        f'    <span style="color:#8b9db8;font-size:0.88rem;">&times;{qty} shares {price_str}</span>'
+        f'  </div>'
+        f'  <span style="color:{status_color};font-size:0.82rem;font-weight:600;">{status_icon} {status.upper()}</span>'
         f'</div>'
-        f'<div style="color:#888;font-size:0.8em;margin-top:4px;">'
-        f'  Risk score: {risk:.0f} &nbsp;|&nbsp; {ts} UTC'
+        f'<div style="color:#4a5a73;font-size:0.75rem;margin-bottom:8px;">'
+        f'  Risk&nbsp;{risk:.0f} &nbsp;·&nbsp; {ts} UTC'
         f'</div>'
-        f'<div style="color:#ccc;font-size:0.9em;margin-top:8px;'
-        f'  border-left:3px solid {side_color};padding-left:10px;">'
+        f'<div style="color:#8b9db8;font-size:0.88rem;line-height:1.5;'
+        f'  border-left:2px solid {side_color};padding-left:10px;">'
         f'  {reasoning}'
         f'</div>'
         f'</div>'
@@ -69,7 +75,7 @@ def _action_card(action: dict) -> str:
 # ── Main render ───────────────────────────────────────────────────────────────
 
 def render(agent, engine, autopilot=None):
-    st.header("My Portfolio")
+    page_header("My Portfolio", "Full holdings, P&L, allocation, and AI trade decisions")
 
     # ── Section A: Account summary ────────────────────────────────────
     try:
@@ -100,7 +106,7 @@ def render(agent, engine, autopilot=None):
     # ── Section B: Holdings table ─────────────────────────────────────
     col_title, col_btn = st.columns([5, 1])
     with col_title:
-        st.subheader("Current Holdings")
+        section_header("Current Holdings")
     with col_btn:
         st.write("")
         if st.button("Refresh Prices", key="port_refresh"):
@@ -181,7 +187,7 @@ def render(agent, engine, autopilot=None):
     st.divider()
 
     # ── Section C: Allocation pie chart ──────────────────────────────
-    st.subheader("Portfolio Allocation")
+    section_header("Portfolio Allocation")
     if positions:
         fig = create_allocation_pie(positions, balance["cash"])
         st.plotly_chart(fig, use_container_width=True)
@@ -191,7 +197,7 @@ def render(agent, engine, autopilot=None):
     st.divider()
 
     # ── Section D: Last Agent Cycle Actions ───────────────────────────
-    st.subheader("Last Agent Cycle — What the AI Did")
+    section_header("Last Agent Cycle — What the AI Did")
 
     live_actions = agent.get_live_actions() if hasattr(agent, "get_live_actions") else []
 
@@ -223,10 +229,10 @@ def render(agent, engine, autopilot=None):
             st.metric("Outcome", label)
 
         st.write("")
-        st.markdown("#### Decision Feed")
+        section_header("Decision Feed")
 
         cards_html = "".join(_action_card(a) for a in live_actions)
         st.markdown(
-            f'<div style="max-height:600px;overflow-y:auto;">{cards_html}</div>',
+            f'<div style="max-height:600px;overflow-y:auto;padding-right:4px;">{cards_html}</div>',
             unsafe_allow_html=True,
         )

@@ -7,6 +7,7 @@ import pandas as pd
 import streamlit as st
 
 from mcp_servers.pattern_scanner_server import get_signal_summary, scan_patterns
+from dashboard.styles import page_header, section_header
 
 DEFAULT_SYMBOLS = "AAPL,MSFT,GOOGL,NVDA,TSLA,AMZN,JPM,XOM,LMT,JNJ"
 
@@ -30,10 +31,9 @@ SIGNAL_LABELS: dict[str, tuple[str, bool]] = {
 
 
 def render(agent, engine, autopilot=None):
-    st.header("Technical Pattern Scanner")
-    st.markdown(
-        "*Sweep multiple stocks for active technical signals — SMA crossovers, RSI, MACD, "
-        "and Bollinger Bands — and get an instant bullish/bearish/neutral verdict for each.*"
+    page_header(
+        "Pattern Scanner",
+        "Sweep stocks for SMA crossovers, RSI, MACD, and Bollinger Band signals — instant bullish/bearish verdict",
     )
 
     # ── Input row ─────────────────────────────────────────────────────────────
@@ -77,7 +77,7 @@ def render(agent, engine, autopilot=None):
     st.divider()
 
     # ── Results table ─────────────────────────────────────────────────────────
-    st.subheader("Signal Overview")
+    section_header("Signal Overview")
     st.caption("Sorted by signal score — most bullish first. Score = bullish signals − bearish signals.")
 
     rows = []
@@ -135,7 +135,7 @@ def render(agent, engine, autopilot=None):
     st.divider()
 
     # ── Per-stock deep-dive ───────────────────────────────────────────────────
-    st.subheader("Stock Deep-Dive")
+    section_header("Stock Deep-Dive")
 
     valid_symbols = [r["symbol"] for r in results if not r.get("error")]
     if not valid_symbols:
@@ -174,13 +174,21 @@ def render(agent, engine, autopilot=None):
         bc1.metric("Bollinger Upper", f"${detail.get('bb_upper', 0):,.2f}")
         bc2.metric("Bollinger Lower", f"${detail.get('bb_lower', 0):,.2f}")
 
-        st.markdown("**Active Signals:**")
+        section_header("Active Signals")
         sigs = detail.get("signals", {})
         active_any = False
+        signals_html = []
         for key, (label, is_bullish) in SIGNAL_LABELS.items():
             if sigs.get(key):
-                icon = "🟢" if is_bullish else "🔴"
-                st.write(f"{icon} {label}")
+                dot_class = "signal-dot-bull" if is_bullish else "signal-dot-bear"
+                signals_html.append(
+                    f'<div class="signal-row">'
+                    f'<div class="{dot_class}"></div>'
+                    f'<span>{label}</span>'
+                    f'</div>'
+                )
                 active_any = True
-        if not active_any:
-            st.write("No strong signals detected at this time.")
+        if active_any:
+            st.markdown("".join(signals_html), unsafe_allow_html=True)
+        else:
+            st.info("No strong signals detected at this time.")

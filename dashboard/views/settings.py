@@ -2,13 +2,14 @@
 from __future__ import annotations
 
 import streamlit as st
+from dashboard.styles import page_header, section_header
 
 
 def render(agent, engine, autopilot=None):
-    st.header("Settings")
+    page_header("Settings", "API keys, trading parameters, and AI configuration")
 
     with st.form("settings_form"):
-        st.subheader("API Keys")
+        section_header("API Keys")
         gemini_key = st.text_input(
             "Gemini API Key",
             value=st.session_state.get("gemini_key", ""),
@@ -23,7 +24,7 @@ def render(agent, engine, autopilot=None):
         )
 
         st.divider()
-        st.subheader("Trading Parameters")
+        section_header("Trading Parameters")
 
         initial_balance = st.number_input(
             "Initial Balance ($)",
@@ -43,7 +44,7 @@ def render(agent, engine, autopilot=None):
         )
 
         st.divider()
-        st.subheader("AI Agent Configuration")
+        section_header("AI Agent Configuration")
 
         watchlist_input = st.text_area(
             "Watchlist (one symbol per line)",
@@ -89,7 +90,7 @@ def render(agent, engine, autopilot=None):
         st.success("Settings saved!")
 
     st.divider()
-    st.subheader("System Actions")
+    section_header("System Actions")
 
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -106,17 +107,17 @@ def render(agent, engine, autopilot=None):
             st.success("Price cache cleared.")
 
     st.divider()
-    st.subheader("About")
-    st.markdown("""
-    **AI Stock Trading Agent** with MCP Integration
-    
-    This system uses:
-    - **MCP (Model Context Protocol)** to connect the AI to financial data, geopolitical intelligence, and trade execution
-    - **Google Gemini** as the LLM brain for analysis and decision-making
-    - **yfinance** for real-time and historical stock data
-    - **NewsAPI** for global news and sentiment analysis
-    - **VADER Sentiment** for news sentiment scoring
-    
-    The AI agent analyzes both technical indicators and geopolitical risk to make 
-    informed trading decisions in a simulated paper trading environment.
-    """)
+    section_header("About")
+    st.markdown(
+        '<div style="background:#0d1421;border:1px solid #1e2d45;border-radius:12px;padding:18px 20px;">'
+        '<div style="color:#e8eaf0;font-weight:600;margin-bottom:10px;">AI Stock Trading Agent</div>'
+        '<div style="color:#8b9db8;font-size:0.87rem;line-height:1.7;">'
+        'Built on <strong>MCP (Model Context Protocol)</strong> · '
+        '<strong>Google Gemini</strong> for analysis · '
+        '<strong>yfinance</strong> for market data · '
+        '<strong>NewsAPI + VADER</strong> for sentiment · '
+        'Paper trading simulation with geopolitical risk awareness.'
+        '</div>'
+        '</div>',
+        unsafe_allow_html=True,
+    )
