@@ -12,3 +12,4 @@ ta
 python-dotenv
 aiohttp
 httpx
+plaid-python

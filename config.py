@@ -12,6 +12,12 @@ CACHE_DIR = DATA_DIR / "cache"
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 NEWS_API_KEY = os.getenv("NEWS_API_KEY", "")
 
+# Plaid Open Banking
+PLAID_CLIENT_ID = os.getenv("PLAID_CLIENT_ID", "")
+PLAID_SECRET = os.getenv("PLAID_SECRET", "")
+PLAID_ENV = os.getenv("PLAID_ENV", "sandbox")  # sandbox | development | production
+PLAID_TOKEN_CACHE = DATA_DIR / "plaid_token.json"
+
 INITIAL_BALANCE = float(os.getenv("INITIAL_BALANCE", "100000"))
 COMMISSION_RATE = float(os.getenv("COMMISSION_RATE", "0.001"))
 
