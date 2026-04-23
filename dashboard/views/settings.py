@@ -57,7 +57,7 @@ def render(agent, engine, autopilot=None):
 
         model = st.selectbox(
             "Gemini Model",
-            ["gemini-3.0-flash", "gemini-2.0-flash", "gemini-2.5-flash"],
+            ["gemini-2.0-flash", "gemini-2.5-flash", "gemini-2.5-pro"],
             index=0,
             key="input_model",
         )
