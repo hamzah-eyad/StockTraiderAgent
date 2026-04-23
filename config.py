@@ -21,7 +21,7 @@ PLAID_TOKEN_CACHE = DATA_DIR / "plaid_token.json"
 INITIAL_BALANCE = float(os.getenv("INITIAL_BALANCE", "100000"))
 COMMISSION_RATE = float(os.getenv("COMMISSION_RATE", "0.001"))
 
-GEMINI_MODEL = "gemini-2.0-flash"
+GEMINI_MODEL = "gemini-3.1-flash-lite-preview"
 
 MCP_SERVERS = {
     "financial_data": {"host": "localhost", "port": 8001},
